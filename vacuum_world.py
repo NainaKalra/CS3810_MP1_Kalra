@@ -67,11 +67,16 @@ class VacuumWorld:
 
     def initial_state(self):
         """Return the initial state as ((row, col), frozenset(dirty))."""
-        return ((row, col), frozenset(dirty))
+        return (self.start, self.dirty)
 
     def is_goal(self, state):
         """Return True if the dirty set in `state` is empty."""
-        raise NotImplementedError("Part 1: implement is_goal")
+        pos, dirty_set = state
+        if len(dirty_set)==0:
+            return True
+        else:
+            return False
+
 
     def get_actions(self, state):
         """Return a list of legal action names available in `state`.
@@ -80,18 +85,38 @@ class VacuumWorld:
         only offered when the robot's current cell is dirty. Return the
         actions in ACTION_ORDER order.
         """
-        raise NotImplementedError("Part 1: implement get_actions")
-
+        pos, dirty_set = state
+        row, col = pos
+        actions = []
+        for action in ACTION_ORDER:
+            if action == 'CLEAN':
+                if pos in dirty_set:
+                    actions.append(action)
+            else:
+                new_row, new_col = DELTAS[action]
+                new_pos = (row+new_row, col+new_col)
+                if self.is_passable(new_pos):
+                    actions.append(action)
+        return(actions)
+                
     def result(self, state, action):
         """Return the successor state produced by applying `action`.
 
         Must not modify `state`.
         """
-        raise NotImplementedError("Part 1: implement result")
+        pos, dirty_set = state
+        row, col = pos
+        if action == 'CLEAN':
+            new_dirty_set = dirty_set - {pos}
+            return (pos, new_dirty_set)
+        else:
+            new_row, new_col = DELTAS[action]
+            new_pos = (row+new_row, col+new_col)
+            return(new_pos,dirty_set)   
 
     def action_cost(self, state, action):
-        """Return the cost of `action` in `state` (always 1 here)."""
-        raise NotImplementedError("Part 1: implement action_cost")
+        return 1
+        
 
     # -- debugging -------------------------------------------------------
 
@@ -104,7 +129,28 @@ class VacuumWorld:
         This is not graded for correctness, but you will use it constantly
         while debugging. Write it first.
         """
-        raise NotImplementedError("Part 1: implement render")
+        if state is None:
+            state = self.initial_state()
+        pos, dirty_set = state
+        
+        lines = []
+        for r in range(self.rows):
+            row_chars = []
+            for c in range(self.cols):
+                cell = (r, c)
+                if self.grid[r][c] == '#':
+                    row_chars.append('#')
+                elif cell == pos and cell in dirty_set:
+                    row_chars.append('*')
+                elif cell == pos:
+                    row_chars.append('R')
+                elif cell in dirty_set:
+                    row_chars.append('D')
+                else:
+                    row_chars.append('.')
+            lines.append(''.join(row_chars))
+    
+        return '\n'.join(lines)  
 
     def __str__(self):
         return self.render()
