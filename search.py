@@ -38,30 +38,35 @@ FOUND = 'FOUND'
 
 
 def dfs_search(problem):
-    """
-    Perform Depth-First Search.
-
-    Args:
-        problem: VacuumWorld instance
-
-    Returns:
-        Tuple (solution_path, nodes_expanded, max_frontier_size)
-        solution_path: List of actions, or None if no solution
-        nodes_expanded: Number of nodes expanded during search
-        max_frontier_size: Maximum size of frontier during search
-
-    Requirements:
-        * Iterative, with an explicit stack. Do NOT recurse - you will hit
-          Python's recursion limit on the larger grids.
-        * Cycle detection with an explored set, or DFS will not terminate.
-        * Returns the FIRST solution found. It will not be optimal, and it
-          is not supposed to be.
-
-    Hint: push (state, path_so_far) pairs. Push successors in reversed()
-    order if you want the stack to explore them in ACTION_ORDER order.
-    """
-    raise NotImplementedError("Part 2a: implement dfs_search")
-
+    start = problem.initial_state()
+    stack = [(start, [])] #(current state, path taken)
+    explored = set() 
+    nodes_expanded = 0 #for efficiency
+    max_frontier_size = 1  #for memory
+#dfs uses stack 
+    while stack:
+        max_frontier_size = max(max_frontier_size,len(stack))
+        state, path = stack.pop()
+        
+        if problem.is_goal(state):
+            return (path, nodes_expanded, max_frontier_size)
+    
+        if state not in explored: #to avoid infinite loops
+            explored.add(state)
+            nodes_expanded += 1
+        
+        actions_list = problem.get_actions(state)
+        #reversed cz stack uses lifo 
+        for act in reversed(actions_list):
+            next_state = problem.result(state, act)
+        
+            if next_state not in explored:
+                new_path = path + [act]
+            
+                stack.append((next_state, new_path))
+            
+    return (None, nodes_expanded, max_frontier_size)
+    
 
 def astar_search(problem, heuristic):
     """
