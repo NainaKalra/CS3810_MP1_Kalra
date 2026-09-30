@@ -55,57 +55,63 @@ def dfs_search(problem):
             explored.add(state)
             nodes_expanded += 1
         
-        actions_list = problem.get_actions(state)
+            actions_list = problem.get_actions(state)
         #reversed cz stack uses lifo 
-        for act in reversed(actions_list):
-            next_state = problem.result(state, act)
+            for act in reversed(actions_list):
+                next_state = problem.result(state, act)
         
-            if next_state not in explored:
-                new_path = path + [act]
+                if next_state not in explored:
+                    new_path = path + [act]
             
-                stack.append((next_state, new_path))
+                    stack.append((next_state, new_path))
             
     return (None, nodes_expanded, max_frontier_size)
     
 
 def astar_search(problem, heuristic):
-    """
-    Perform A* Search.
+    start = problem.initial_state()
+    frontier = PriorityQueue()
+    g = {start: 0}  # Best cost so far
+    came_from = {}
+    frontier.push(start, heuristic(start, problem))
+    nodes_expanded = 0
+    max_frontier_size = 1
 
-    Args:
-        problem: VacuumWorld instance
-        heuristic: Function h(state, problem) -> estimated cost to goal
+    while frontier:
+        max_frontier_size = max(max_frontier_size, len(frontier))
+        state = frontier.pop()
+        
+        # Goal checking 
+        if problem.is_goal(state):
+            path = _reconstruct(came_from, state)
+            return (path, nodes_expanded, max_frontier_size)
+        
+        nodes_expanded += 1
+        
+        for action in problem.get_actions(state):
+            successor = problem.result(state, action)
+            new_cost = g[state] + problem.action_cost(state, action)
+            
+            #if it didnt see the state earlier or got a new way this time 
+            if successor not in g or new_cost < g[successor]:
+                g[successor] = new_cost
+                came_from[successor] = (state, action)
+                
+                priority = new_cost + heuristic(successor, problem)
+                frontier.push(successor, priority)
+                
+    return (None, nodes_expanded, max_frontier_size)
 
-    Returns:
-        Tuple (solution_path, nodes_expanded, max_frontier_size)
-
-    Requirements:
-        * Priority queue ordered by f(n) = g(n) + h(n).
-        * Handle REOPENING: if you find a cheaper path to a state you have
-          already expanded, you must be able to improve it. The provided
-          PriorityQueue supports this - pushing an item already in the
-          queue replaces its priority instead of duplicating it.
-        * With an admissible heuristic this MUST return an optimal
-          solution. run_tests.py checks that against known optimal costs.
-
-    Hint: keep a dict g[state] of best-known cost-so-far and a dict
-    came_from[state] = (parent_state, action) to rebuild the path at the
-    end. A helper like _reconstruct() below keeps the main loop readable.
-    """
-    raise NotImplementedError("Part 2b: implement astar_search")
-
-
+#helper _reconstruct - 
 def _reconstruct(came_from, state):
-    """Walk came_from backwards from `state` and return the action list.
+    path = []
+    while state in came_from:
+        parent, action = came_from[state]
+        path.append(action)
+        state = parent
+    path.reverse()
+    return path
 
-    Args:
-        came_from: Dict mapping state -> (parent_state, action)
-        state: The goal state reached by the search
-
-    Returns:
-        List of actions from the initial state to `state`.
-    """
-    raise NotImplementedError("Part 2b: implement _reconstruct (optional helper)")
 
 
 def idastar_search(problem, heuristic):

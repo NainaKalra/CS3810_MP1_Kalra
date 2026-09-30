@@ -18,46 +18,29 @@ why the true remaining cost can never be smaller than it.
 
 
 def manhattan(a, b):
-    """Return the Manhattan distance between two (row, col) positions.
-
-    Note for your admissibility argument: on this grid, the true number of
-    moves between two cells is ALWAYS at least their Manhattan distance.
-    Obstacles can only force a detour, never a shortcut.
-    """
-    raise NotImplementedError("Part 3: implement manhattan")
-
+    row1, col1 = a
+    row2, col2 = b
+    return abs(row1 - row2) + abs(col1 - col2)
 
 def h0(state, problem):
-    """The zero heuristic.
-
-    Always returns 0. This is not a throwaway: with h(n) = 0, A* degenerates
-    into uniform-cost search, which is your experimental baseline for "what
-    does an uninformed optimal search cost?"
-    """
-    raise NotImplementedError("Part 3: implement h0")
-
+    return 0
 
 def h1(state, problem):
-    """Number of dirty cells remaining.
-
-    Admissible because each remaining dirty cell needs at least its own
-    CLEAN action, and CLEAN costs 1.
-    """
-    raise NotImplementedError("Part 3: implement h1")
-
+    pos, dirty_set = state
+    return len(dirty_set)
 
 def h2(state, problem):
-    """Dirty cells remaining + Manhattan distance to the NEAREST dirty cell.
-
-    Returns 0 when nothing is dirty.
-
-    For the report: explain why adding the distance term keeps the estimate
-    a lower bound - the robot must reach at least one dirty cell before it
-    can clean anything, and reaching the nearest one is the cheapest way to
-    do that.
-    """
-    raise NotImplementedError("Part 3: implement h2")
-
+    pos, dirty_set = state
+    if not dirty_set:  
+        return 0
+    distances = []
+    for d in dirty_set:
+        dist = manhattan(pos, d)
+        distances.append(dist)
+    nearest_distance = min(distances)
+    
+    total_dirt_count = len(dirty_set)
+    return nearest_distance + total_dirt_count
 
 def h3(state, problem):
     """YOUR heuristic (optional, up to 10 bonus points).
