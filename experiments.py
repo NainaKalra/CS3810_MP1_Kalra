@@ -196,41 +196,55 @@ def sweep(grid_names, timeout, out_path='results.csv'):
 # ---------------------------------------------------------------------------
 
 def make_table(rows):
-    """TODO: build the results table for your report.
-
-    The handout asks for solution cost, nodes expanded, max frontier size
-    (DFS and A*) or iterations (IDA*), and runtime, for every configuration.
-
-    A readable table is not a CSV dump. Decide what goes in rows and what
-    goes in columns, and make it possible to compare algorithms at a glance.
-    pandas.DataFrame(rows) and .pivot_table() will do most of the work, or
-    write it out by hand - either is fine.
-    """
-    raise NotImplementedError("Part 4: build your results table")
+    import pandas as pd
+    df = pd.DataFrame(rows)
+    cols = ['grid', 'algorithm', 'heuristic', 'status',
+            'cost', 'nodes_expanded', 'max_frontier', 'iterations', 'seconds']
+    table = df[cols].sort_values(['grid', 'algorithm', 'heuristic'])
+    print(table.to_string(index=False))
+    table.to_csv('results_table.csv', index=False)
+    return table
 
 
 def plot_scaling(rows):
-    """TODO: plot #1 - how does each algorithm scale with the amount of dirt?
-
-    Suggested shape: x = number of dirty cells, y = nodes expanded, one line
-    per algorithm (hold the heuristic fixed at h2). A log scale on y will
-    probably help; say in the caption why you chose it.
-
-    Save to figures/scaling.png.
-    """
-    raise NotImplementedError("Part 4: plot nodes expanded vs. problem size")
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import os
+    df = pd.DataFrame(rows)
+    df = df[df['status'] == 'ok']
+    plt.figure()
+    for algo in ['dfs', 'astar', 'idastar']:
+        subset = df[df['algorithm'] == algo]
+        if algo != 'dfs':
+            subset = subset[subset['heuristic'] == 'h2']
+        subset = subset.sort_values('n_dirty')
+        plt.plot(subset['n_dirty'], subset['nodes_expanded'], marker='o', label=algo)
+    plt.xlabel('Number of dirty cells')
+    plt.ylabel('Nodes expanded')
+    plt.yscale('log')
+    plt.title('Nodes expanded vs. problem size (h2 for astar/idastar)')
+    plt.legend()
+    os.makedirs('figures', exist_ok=True)
+    plt.savefig('figures/scaling.png')
+    plt.close()
 
 
 def plot_heuristics(rows):
-    """TODO: plot #2 - what does a better heuristic buy you?
-
-    Suggested shape: A* nodes expanded under h0 vs h1 vs h2 (and h3 if you
-    did the bonus), grouped by grid. This is the evidence for your answer to
-    discussion question 2.
-
-    Save to figures/heuristics.png.
-    """
-    raise NotImplementedError("Part 4: plot the effect of the heuristic")
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import os
+    df = pd.DataFrame(rows)
+    df = df[(df['status'] == 'ok') & (df['algorithm'] == 'astar')]
+    pivot = df.pivot_table(index='grid', columns='heuristic', values='nodes_expanded')
+    pivot.plot(kind='bar')
+    plt.xlabel('Grid')
+    plt.ylabel('Nodes expanded (A*)')
+    plt.title('A* nodes expanded by heuristic')
+    plt.yscale('log')
+    plt.tight_layout()
+    os.makedirs('figures', exist_ok=True)
+    plt.savefig('figures/heuristics.png')
+    plt.close()
 
 
 # ---------------------------------------------------------------------------
