@@ -113,41 +113,62 @@ def _reconstruct(came_from, state):
     return path
 
 
-
 def idastar_search(problem, heuristic):
-    """
-    Perform Iterative Deepening A* Search.
+    start = problem.initial_state()
+    threshold = heuristic(start, problem)
+    nodes_expanded = 0
+    iterations = 0
 
-    Args:
-        problem: VacuumWorld instance
-        heuristic: Function h(state, problem) -> estimated cost to goal
-
-    Returns:
-        Tuple (solution_path, nodes_expanded, iterations)
-        iterations: Number of depth-limited iterations performed
-
-    Requirements:
-        * Iterative deepening on an f-cost THRESHOLD, not on depth. The
-          next threshold is the smallest f-value that exceeded the current
-          one.
-        * Linear space: no explored set carried across iterations. You may
-          track the states on the current path to avoid immediate cycles.
-        * Returns an optimal solution.
-
-    Structure that works (write DFS and A* first - this will make far more
-    sense once you have both):
-
-        threshold = h(start)
-        loop:
-            result = search(start, g=0, threshold)
-            if result is FOUND:    return the path
-            if result is infinite: return None (no solution)
-            threshold = result
-
-    where search(state, g, threshold) returns FOUND, or the smallest
-    f-value it saw that exceeded the threshold, or math.inf.
-    """
-    raise NotImplementedError("Part 2c: implement idastar_search")
+#helper function - its gonna go in depth first way
+    def search(state, g, path, action_path):
+        nonlocal nodes_expanded # it allows modification of the outer function's variable inside this helper function.        
+        f = g + heuristic(state, problem)
+        if f > threshold:
+            return f
+        
+        if problem.is_goal(state):
+            return FOUND
+        
+        nodes_expanded += 1
+        min_exceeded = math.inf #initialization to track values for min
+        
+        for action in problem.get_actions(state):
+            successor = problem.result(state, action)
+            if successor in path:
+                continue
+            
+            new_g = g + problem.action_cost(state, action)
+            path.append(successor)
+            action_path.append(action)
+            
+            result = search(successor, new_g, path, action_path)
+            
+            if result == FOUND:
+                return FOUND
+            
+            path.pop() #backtracking
+            action_path.pop()
+            
+            if result < min_exceeded:
+                min_exceeded = result
+        
+        return min_exceeded
+    
+    while True:
+        path = [start]
+        action_path = []
+        
+        result = search(start, 0, path, action_path)
+        
+        iterations += 1
+        
+        if result == FOUND:
+            return (action_path, nodes_expanded, iterations)
+        
+        if result == math.inf:
+            return (None, nodes_expanded, iterations)
+        
+        threshold = result
 
 
 if __name__ == "__main__":
