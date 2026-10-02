@@ -6,13 +6,13 @@ While working on the code, I used Claude mainly as a debugging and learning supp
 
 When I got stuck while working on a part of the assignment, I sometimes used AI to give me a hint about the next step instead of asking it to complete the problem for me.
 
-There were also times when I had a gap in my understanding of something from an earlier part of the assignment. In those cases, I used AI to explain the earlier concept so I could understand it before continuing with the current part.
+There were also times when I had a gap in my understanding of something from an earlier part of the assignment. In those cases, I used AI to explain the earlier concept so I could understand it before continuing with the current part like sometimes its hard to understand things in engllish so I asked it to translate it to my language so that I get better understanding.
 
 I reviewed the suggestions, made the changes myself, and tested my code to make sure I understood how it worked.
 
 ## AI Tool Used
-
-- Claude 
+- Google Gemini (for translation mostly and explanation of material)
+- Claude (debugging and hints if got stuck)
 
 ## Main Uses
 
