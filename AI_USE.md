@@ -22,4 +22,4 @@ I reviewed the suggestions, made the changes myself, and tested my code to make 
 - Reviewing concepts from earlier parts of the assignment
 - Clarifying concepts from the class materials
 
-AI was used as a learning and debugging aid, while the implementation and testing of the project were completed by me :)
+Overall, AI was used as a learning and debugging aid, while the implementation and testing of the project were completed by me :)
